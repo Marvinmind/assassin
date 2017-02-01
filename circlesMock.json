@@ -1,0 +1,33 @@
+{
+  "circles" : [
+    {
+      "name": "daplayers",
+      "players": [
+        "karl",
+        "ute",
+        "gustav",
+        "markus"
+      ],
+      "alive": [
+        "karl",
+        "ute",
+        "gustav",
+        "markus"
+      ]
+    },
+    {
+      "name": "noobies",
+      "players": [
+        "karl",
+        "ute",
+        "gustav",
+        "markus"
+      ],
+      "alive": [
+        "karl",
+        "paul",
+        "gustav"
+      ]
+    }
+  ]
+}

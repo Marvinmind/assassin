@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="assassinsApp">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.0/angular.js"></script>
+    <script src="AngApp.js"></script>
+    <title>The Assassins Game</title>
+</head>
+<body>
+    <div ng-controller="CirclesCtrl">
+        <div ng-hide="circles.length">
+            <div class="alert alert-warning"> You are not participating in any circles</div>
+        </div>
+        <div ng-show = "user"> Hello {{user}}</div>
+        <ul ng-repeat = "circle in circles">
+            <div my-circle></div>
+        </ul>
+    </div>
+
+</body>
+</html>
