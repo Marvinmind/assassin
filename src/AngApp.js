@@ -7,7 +7,7 @@ angular.module('assassinsApp', ['btford.socket-io'])
         console.log(mySocket)
         var sockServer = 'http://localhost:4200'
         var WebSocket = mySocket.connect(sockServer)
-        //WebSocket.emit('hello', {"hello":"hey"})
+        WebSocket.emit('hello', {"hello":"hey"})
         console.log('run!')
         var getCircle = function(name){
             console.log(name)
@@ -31,7 +31,9 @@ angular.module('assassinsApp', ['btford.socket-io'])
 
     })
     .factory('mySocket', function (socketFactory) {
-        return socketFactory();
+        opts = {}
+        opts.ioSocket = io.connect('http://localhost:4200')
+        return socketFactory(opts);
     })
 
     .directive('myCircle', function(){
