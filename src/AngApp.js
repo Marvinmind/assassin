@@ -3,11 +3,19 @@
  */
 angular.module('assassinsApp', ['btford.socket-io'])
     .controller('CirclesCtrl', function($scope, $http, mySocket){
-        console.log('ready for socket')
+        $scope.username = 'karl'
         console.log(mySocket)
-        var sockServer = 'http://localhost:4200'
-        var WebSocket = mySocket.connect(sockServer)
-        WebSocket.emit('hello', {"hello":"hey"})
+        $scope.thestatus = 'not updated'
+        mySocket.forward('update_target', $scope)
+        mySocket.emit('authenticate', {'name':$scope.username})
+        $scope.$on('socket:update_target', function(ev, res){
+            console.log('update target')
+            var circle = $scope.userCircles.filter(obj =>{
+                return obj.circleName == res.circle
+            })[0]
+            circle.nextTarget = res.target
+
+        })
         console.log('run!')
         var getCircle = function(name){
             console.log(name)
@@ -20,13 +28,9 @@ angular.module('assassinsApp', ['btford.socket-io'])
             $scope.allCircles = res.data.circles
         })
 
-        $http.get(`/${$scope.user}/circles`).then(function(res){
+        $http.get(`/users/${$scope.user}`).then(function(res){
             $scope.userCircles = res.data.circles
-        })
-        WebSocket.on(function(res){
-            if (res.data)
-            circ = getCircle(res.circle)
-            circ.target = res.target
+            console.log($scope.userCircles)
         })
 
     })
@@ -38,6 +42,6 @@ angular.module('assassinsApp', ['btford.socket-io'])
 
     .directive('myCircle', function(){
         return{
-            template: '<li>Name: {{circle.name}} <br>Next Target: {{circle.nextVictim}}'
+            template: '<li>Name: {{circle.circleName}} <br>Next Target: {{circle.nextTarget}}'
         }
     });

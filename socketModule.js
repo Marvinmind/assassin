@@ -3,6 +3,8 @@
  */
 
 
+var sockets = []
+
 ex = {}
 ex.createServer = function (app) {
     var server = require('http').createServer(app);
@@ -11,7 +13,30 @@ ex.createServer = function (app) {
     console.log('listening')
 
     io.on('connection', function(socket){
-        console.log('said hello')
+        var hash = {}
+        hash.socket = socket
+        sockets.push(hash)
+
+        io.emit('update', {'data': 'new hell yeah update!!'})
+        socket.on('authenticate', function (data) {
+            hash.user = data.name
+            console.log('auth')
+            console.log(sockets.length)
+
+        })
+
+
+    })
+}
+ex.updateTarget = function(user, circle, target){
+    console.log('ab geht die lutzi')
+    console.log(sockets)
+    var userSocks = sockets.filter(obj => {
+        return obj.user == user
+    })
+    userSocks.forEach(function(socket){
+        console.log('send event')
+        socket.socket.emit('update_target', {circle:circle, target:target})
     })
 }
 

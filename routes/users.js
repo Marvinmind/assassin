@@ -1,22 +1,32 @@
 var express = require('express');
+const sockServer = require('../socketModule.js')
 var router = express.Router();
-const db = require('monk')('martin:knuthansen@localhost/murder')
+const db = require('monk')('localhost/murder')
 const users = db.get('users')
 const circles = db.get('circles')
 
 
 /* GET users listing. */
 router.get('/:user([a-zA-Z]+)$', function(req, res, next) {
-  var user = {};
+  var user = {}
   user.name = req.params.user;
   users.findOne({name:user.name}).then((userDoc) => {
+      console.log('user')
+      console.log(userDoc)
+
       circles.find({players: {$elemMatch:{$eq:userDoc._id}}}).then((circlesDoc) => {
-        var promises = circlesDoc.map((obj) => {
+          console.log(circlesDoc)
+          var promises = circlesDoc.map((obj) => {
             return get_user_target(obj, userDoc);
         });
         Promise.all(promises).then((result) => {
+            console.log('build result')
             console.log(result)
-            user.circles = result.map((obj) => {return {circleName:obj.circle, nextTarget: obj.next_target_name}});
+            if(result[0]) {
+                user.circles = result.map((obj) => {
+                    return {circleName: obj.circle, nextTarget: obj.next_target_name}
+                });
+            }
             res.send(JSON.stringify(user, null, 4)+'\n');
 
         })
@@ -54,6 +64,9 @@ router.post('/:user([a-zA-Z]+)/:circle([a-zA-Z]+)/killTarget', function(req, res
                                        res.send('Congratulations, you won!\n')
                                    }
                                    else {
+                                       get_user_target(circle_name, user_name)
+                                       sockServer.updateTarget(user_name, circle_name, 'test_user')
+                                        console.log('called update')
                                        res.send('Target killed\n')
                                    }
                                })
@@ -73,8 +86,10 @@ router.post('/:user([a-zA-Z]+)/:circle([a-zA-Z]+)/killTarget', function(req, res
 });
 
 function get_user_target(circle, user){
+    console.log('get target')
     if (circle.active) {
         const index = circle.kill_list.findIndex((el) => {return user._id.equals(el)});
+        console.log(index)
         if(index>=0) {
             const vicId = circle.kill_list[(index + 1) % circle.kill_list.length];
             return users.findOne({_id: vicId}).then((res) => {
@@ -82,7 +97,7 @@ function get_user_target(circle, user){
             });
         }
         else{
-            return Promise.resolve(undefined)
+            return {circle:circle.name, next_target_name:'no target. You have been eliminated'}
         }
     }
     else{

@@ -3,3 +3,5 @@ extends layout
 block content
   div(ng-app='assassinsApp')
     div(ng-controller='CirclesCtrl')
+      div(ng-repeat='circle in userCircles')
+        my-circle
