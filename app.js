@@ -8,15 +8,20 @@ const bodyParser = require('body-parser');
 const index = require('./routes/index');
 const users = require('./routes/users');
 const circles = require('./routes/circles');
-
-const app = express(  );
-
+const sockets = require('./socketModule')
+app = express()
+sockets.createServer(app)
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
 
 // uncomment after placing your favicon in /public
 //app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
+app.use('/js', express.static('bower_components'))
+app.use('/src', express.static('src'))
+app.use('/public', express.static('public'))
+
+
 app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));

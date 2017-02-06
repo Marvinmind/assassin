@@ -1,0 +1,24 @@
+{
+  "name": "assassin",
+  "description": "A platform for the Assissins Game",
+  "main": "",
+  "authors": [
+    "martin <martin.schwarzmaier@gmail.com>"
+  ],
+  "license": "MIT",
+  "homepage": "https://github.com/Marvinmind/assassin",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "angular-socket-io": "^0.7.0",
+    "angular": "^1.6.1",
+    "ngSocket": "^0.2.1",
+    "socket.io-client": "^1.7.2"
+  }
+}
