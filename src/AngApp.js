@@ -3,7 +3,7 @@
  */
 angular.module('assassinsApp', ['btford.socket-io'])
     .controller('CirclesCtrl', function($scope, $http, mySocket){
-        $scope.username = 'karl'
+        $scope.username = 'martin'
         console.log(mySocket)
         $scope.thestatus = 'not updated'
         mySocket.forward('update_target', $scope)
@@ -13,6 +13,7 @@ angular.module('assassinsApp', ['btford.socket-io'])
             var circle = $scope.userCircles.filter(obj =>{
                 return obj.circleName == res.circle
             })[0]
+            console.log(res.target)
             circle.nextTarget = res.target
 
         })
@@ -23,12 +24,11 @@ angular.module('assassinsApp', ['btford.socket-io'])
                 return obj.name == name
             })[0]
         }
-        $scope.user = 'karl'
         $http.get('/circles').then(function(res){
             $scope.allCircles = res.data.circles
         })
 
-        $http.get(`/users/${$scope.user}`).then(function(res){
+        $http.get(`/users/${$scope.username}`).then(function(res){
             $scope.userCircles = res.data.circles
             console.log($scope.userCircles)
         })

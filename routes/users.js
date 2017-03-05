@@ -57,19 +57,22 @@ router.post('/:user([a-zA-Z]+)/:circle([a-zA-Z]+)/killTarget', function(req, res
                    if (circle_docs.active) {
                        get_user_target(circle_docs, user_docs).then((result) => {
                            if (result) {
-                               circles.update({name: circle_name}, {$pull: {kill_list: result.next_target_id}});
-                               circles.findOne({name: circle_name}).then((result) => {
-                                   if (result.kill_list.length == 1) {
+                               const updateP = circles.update({name: circle_name}, {$pull: {kill_list: result.next_target_id}});
+                               updateP.then(circles.findOne({name: circle_name}).then((updatedCircleDocs) => {
+                                   if (updatedCircleDocs.kill_list.length == 1) {
                                        circles.update({name: circle_name}, {$set: {active: false}})
                                        res.send('Congratulations, you won!\n')
                                    }
                                    else {
-                                       get_user_target(circle_name, user_name)
-                                       sockServer.updateTarget(user_name, circle_name, 'test_user')
-                                        console.log('called update')
-                                       res.send('Target killed\n')
+                                       const targetP = get_user_target(updatedCircleDocs, user_docs)
+                                       targetP.then((nextTarget) =>
+                                       {
+                                           sockServer.updateTarget(user_name, circle_name, nextTarget.next_target_name)
+                                           console.log('called update')
+                                           res.send('Target killed\n')
+                                       })
                                    }
-                               })
+                               }))
                            }
                        })
                    } else {

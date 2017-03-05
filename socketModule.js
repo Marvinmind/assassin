@@ -20,9 +20,6 @@ ex.createServer = function (app) {
         io.emit('update', {'data': 'new hell yeah update!!'})
         socket.on('authenticate', function (data) {
             hash.user = data.name
-            console.log('auth')
-            console.log(sockets.length)
-
         })
 
 
@@ -30,7 +27,7 @@ ex.createServer = function (app) {
 }
 ex.updateTarget = function(user, circle, target){
     console.log('ab geht die lutzi')
-    console.log(sockets)
+    console.log(target)
     var userSocks = sockets.filter(obj => {
         return obj.user == user
     })

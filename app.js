@@ -10,6 +10,37 @@ const users = require('./routes/users');
 const circles = require('./routes/circles');
 const sockets = require('./socketModule')
 app = express()
+
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(cookieParser());
+
+//add user management
+const session = require('express-session')
+const MongoStore = require('connect-mongo')(session)
+const config = require('./config/redis')
+const passport = require('passport')
+
+require('./auth').init(app)
+console.log(config.redisStore.secret)
+app.use(session({
+    store: new MongoStore({
+        db: 'express',
+        url: 'mongodb://localhost/murder'
+    }),
+    secret: "very secret secret",
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+        secure : false
+    }
+}))
+
+app.use(passport.initialize())
+app.use(passport.session())
+
+
+
 sockets.createServer(app)
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -23,12 +54,26 @@ app.use('/public', express.static('public'))
 
 
 app.use(logger('dev'));
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: false }));
-app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use('/', index);
+app.get('/test', passport.authenticationMiddleware(), function(req, res){
+    res.send('have an index page')
+})
+
+app.get('/login', function(req, res, next){
+    res.render('login')
+})
+
+app.post('/login', passport.authenticate('local', {
+    successRedirect: '/successLogin',
+    failureRedirect: '/failedLogin'
+}))
+
+app.get('/successLogin', function(req, res, next){
+    res.send('you have been logged in')
+})
+
+//app.use('/', index);
 app.use('/users', users);
 app.use('/circles', circles);
 
@@ -49,5 +94,6 @@ app.use(function(err, req, res, next) {
   res.status(err.status || 500);
   res.render('error');
 });
+app.listen(3000)
 
 module.exports = app;

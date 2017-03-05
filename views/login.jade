@@ -1,0 +1,11 @@
+//
+   Created by Martin on 05.03.2017.
+
+extends layout
+block content
+    form(action='/login', method="POST")
+        input(name="user", id="username", type="text")
+        br
+        input(name="passwd", id="passwd", type="password")
+        br
+        input(type="submit")
