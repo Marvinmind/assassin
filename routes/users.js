@@ -5,35 +5,35 @@ const db = require('monk')('localhost/murder')
 const users = db.get('users')
 const circles = db.get('circles')
 
-
 /* GET users listing. */
-router.get('/:user([a-zA-Z]+)$', function(req, res, next) {
+function f(app, passport){
+router.get('/:user([a-zA-Z]+)$', passport.authenticationMiddleware(), function(req, res, next) {
   var user = {}
   user.name = req.params.user;
   users.findOne({name:user.name}).then((userDoc) => {
-      console.log('user')
-      console.log(userDoc)
-
       circles.find({players: {$elemMatch:{$eq:userDoc._id}}}).then((circlesDoc) => {
-          console.log(circlesDoc)
           var promises = circlesDoc.map((obj) => {
             return get_user_target(obj, userDoc);
         });
         Promise.all(promises).then((result) => {
-            console.log('build result')
-            console.log(result)
             if(result[0]) {
                 user.circles = result.map((obj) => {
-                    return {circleName: obj.circle, nextTarget: obj.next_target_name}
-                });
+                    if(obj) {
+                        return {circleName: obj.circle, nextTarget: obj.next_target_name}
+                    }
+                    else{
+                        return undefined
+                    }
+                }).filter(function(obj){return obj != undefined});
             }
+            console.log(user)
             res.send(JSON.stringify(user, null, 4)+'\n');
 
         })
     });
   });
 });
-router.post('/$', function(req, res, next) {
+router.post('/$', passport.authenticationMiddleware(), function(req, res, next) {
     const userName = req.body.name;
     users.find({name:userName}).then((userDoc) => {
         if (!userDoc) {
@@ -47,7 +47,28 @@ router.post('/$', function(req, res, next) {
 
 });
 
-router.post('/:user([a-zA-Z]+)/:circle([a-zA-Z]+)/killTarget', function(req, res, next) {
+router.post('/:user([a-zA-Z]+)/joinCircle', passport.authenticationMiddleware(), function(req, res, next) {
+    const userName = req.params.user
+    const circleName = req.body.circleName
+    users.findOne({name:userName}).then((userDoc) => {
+
+        if (userDoc) {
+            circles.findOne({name: circleName}).then((circleDoc)=> {
+                if (circleDoc && circleDoc.players.findIndex((el) => {return userDoc._id.equals(el)}) < 0) {
+                    circles.update({name: circleName}, {$push: {players: userDoc._id}}).then(function(){
+                        res.redirect('/')
+                    })
+                }
+                else{
+                    res.send("circle not found")
+                }
+            })
+        }
+
+    })
+})
+
+router.post('/:user([a-zA-Z]+)/:circle([a-zA-Z]+)/killTarget', passport.authenticationMiddleware(), function(req, res, next) {
    const user_name = req.params.user;
    const circle_name = req.params.circle
    users.findOne({name:user_name}).then((user_docs) => {
@@ -86,13 +107,13 @@ router.post('/:user([a-zA-Z]+)/:circle([a-zA-Z]+)/killTarget', function(req, res
            res.status(404).send('user not found\n')
        }
    })
-});
+})
+return router
+};
 
 function get_user_target(circle, user){
-    console.log('get target')
     if (circle.active) {
         const index = circle.kill_list.findIndex((el) => {return user._id.equals(el)});
-        console.log(index)
         if(index>=0) {
             const vicId = circle.kill_list[(index + 1) % circle.kill_list.length];
             return users.findOne({_id: vicId}).then((res) => {
@@ -108,4 +129,4 @@ function get_user_target(circle, user){
     }
 }
 
-module.exports = router;
+module.exports = f;

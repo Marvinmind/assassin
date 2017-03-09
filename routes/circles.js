@@ -11,7 +11,6 @@ const users = db.get('users')
 //get all circles
 router.get('/$', function (req,res) {
         circles.find({}, {fields: {name:1, players:1, _id:0}}).then(docs =>{
-        console.log(docs)
         res.send(JSON.stringify(docs)+'\n')
     })
 
@@ -32,8 +31,8 @@ router.post('/$', function(req, res, next) {
         return
     }
     circles.findOne({name:circleName}).then((circleDocs) => {
-        if (circleDocs) {
-            circles.update({name: circleName}, {name: circleName, active: false}, {upsert: true});
+        if (!circleDocs) {
+            circles.update({name: circleName}, {name: circleName, active: false, players:[]}, {upsert: true});
             res.send('circle added \n');
         } else {
             res.status(303).send('circle already exists\n')

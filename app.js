@@ -6,7 +6,6 @@ const cookieParser = require('cookie-parser');
 const bodyParser = require('body-parser');
 
 const index = require('./routes/index');
-const users = require('./routes/users');
 const circles = require('./routes/circles');
 const sockets = require('./socketModule')
 app = express()
@@ -39,6 +38,7 @@ app.use(session({
 app.use(passport.initialize())
 app.use(passport.session())
 
+const users = require('./routes/users')(app, passport);
 
 
 sockets.createServer(app)
@@ -64,6 +64,7 @@ app.get('/login', function(req, res, next){
     res.render('login')
 })
 
+
 app.post('/login', passport.authenticate('local', {
     successRedirect: '/successLogin',
     failureRedirect: '/failedLogin'
@@ -72,8 +73,7 @@ app.post('/login', passport.authenticate('local', {
 app.get('/successLogin', function(req, res, next){
     res.send('you have been logged in')
 })
-
-//app.use('/', index);
+app.get('/', index)
 app.use('/users', users);
 app.use('/circles', circles);
 

@@ -42,6 +42,6 @@ angular.module('assassinsApp', ['btford.socket-io'])
 
     .directive('myCircle', function(){
         return{
-            template: '<li>Name: {{circle.circleName}} <br>Next Target: {{circle.nextTarget}}'
+            template: '<li>Name: {{circle.circleName}} Next Target: {{circle.nextTarget}}</li>'
         }
     });

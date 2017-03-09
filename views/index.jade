@@ -5,3 +5,8 @@ block content
     div(ng-controller='CirclesCtrl')
       div(ng-repeat='circle in userCircles')
         my-circle
+
+  form(action='/users/'+user.name+'/joinCircle', method="POST")
+    input(name="circleName", id="circlename", type="text")
+    br
+    input(type="submit")

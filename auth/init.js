@@ -7,15 +7,11 @@ const authenticationMiddleware = require('./auth-middleware')
 
 
 passport.serializeUser(function(user, done) {
-    console.log('serialize')
     done(null, user._id);
 });
 
 passport.deserializeUser(function(id, done) {
-    console.log('deserialize')
     users.findOne({_id: id}, function(err, user) {
-        console.log(user)
-
         done(err, user);
     });
 });
@@ -26,6 +22,7 @@ function initPassport () {
             passwordField: 'passwd'
         },
         function(username, password, done) {
+            console.log('start lookup')
             users.findOne({ name: username }, function(err, user) {
                 if (err) { return done(err); }
 
